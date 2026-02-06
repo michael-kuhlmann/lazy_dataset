@@ -306,6 +306,7 @@ def from_dir(
     name: str = None,
     parents: Union[Callable, int] = 0,
     sep: str = "/",
+    exclude_dirs: Tuple[str, ...] = (),
 ) -> "DictDataset":
     """Create a new DictDataset from a directory path.
 
@@ -388,6 +389,8 @@ def from_dir(
             created, an AssertionError is raised.
         sep (str, optional): Separator to use for joining folder names.
             Defaults to "/".
+        exclude_dirs (Tuple[str, ...], optional): Names of directories to
+            exclude from scanning. Defaults to ().
 
     Returns:
         DictDataset: A dataset containing the scanned files.
@@ -397,7 +400,7 @@ def from_dir(
     # Adapted from https://stackoverflow.com/a/59803793/16085876
     def _run_fast_scandir(root: os.PathLike, ext: List[str]):
         for f in os.scandir(root):
-            if f.is_dir():
+            if f.is_dir() and f.name not in exclude_dirs:
                 yield from _run_fast_scandir(f.path, ext)
             if f.is_file():
                 if any(f.name.endswith(e) for e in ext):
